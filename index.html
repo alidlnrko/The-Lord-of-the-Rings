@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: The Lord of the Rings</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #222; color: white; }
+        .container { max-width: 400px; margin: 50px auto; padding: 20px; background: #333; border-radius: 10px; }
+        .quiz-btn { background: #ff6600; color: white; border: none; padding: 10px; margin: 10px; cursor: pointer; border-radius: 5px; display: block; width: 100%; }
+        .quiz-btn:hover { background: #ff4500; }
+        .hidden { display: none; }
+        #timer { font-size: 20px; margin: 10px 0; }
+        #explanation { font-size: 16px; margin-top: 10px; color: #ffcc00; }
+        #next-btn { background: #008000; color: white; border: none; padding: 10px; margin: 10px; cursor: pointer; border-radius: 5px; display: none; }
+        #next-btn:hover { background: #006400; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Quiz: The Lord of the Rings</h1>
+        <p id="timer"></p>
+        <p id="question"></p>
+        <div id="answers"></div>
+        <p id="explanation" class="hidden"></p>
+        <button id="next-btn" onclick="nextQuestion()">Next</button>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "Who gave Frodo the sword Sting?", a: ["Gandalf", "Bilbo", "Aragorn"], c: 1, exp: "Bilbo gave the sword to Frodo in Rivendell." },
+            { q: "What is the capital city of Gondor?", a: ["Edoras", "Minas Tirith", "Isengard"], c: 1, exp: "Minas Tirith is the majestic capital of Gondor." },
+            { q: "What was Aragorn's sword called?", a: ["Glamdring", "Anduril", "Morgul Blade"], c: 1, exp: "Anduril was reforged from the shards of Narsil." },
+            { q: "Which ring did Frodo wear?", a: ["The One Ring", "The Seeing Ring", "Ring of Power"], c: 0, exp: "Frodo wore The One Ring." },
+            { q: "Who created The One Ring?", a: ["Gandalf", "Sauron", "Saruman"], c: 1, exp: "Sauron created The One Ring to rule Middle-earth." },
+            { q: "What was Aragorn's father's name?", a: ["Aradan", "Arathorn", "Androg"], c: 1, exp: "Aragorn's father was Arathorn II." },
+            { q: "What was the race of Legolas?", a: ["Dwarves", "Men", "Elves"], c: 2, exp: "Legolas is an elf from Mirkwood." },
+            { q: "Who was the guardian of the White Tree?", a: ["Denethor", "Gandalf", "Boromir"], c: 0, exp: "Denethor II was the guardian of the White Tree of Gondor." },
+            { q: "What was Boromir's brother's name?", a: ["Faramir", "Éomer", "Theodred"], c: 0, exp: "Faramir was Boromir's younger brother." },
+            { q: "Where was The One Ring destroyed?", a: ["The Misty Mountains", "Mount Doom", "Lothlórien"], c: 1, exp: "The One Ring was destroyed in Mount Doom (Orodruin)." }
+        ];
+        
+        let index = 0, score = 0, timeLeft;
+        let timerInterval;
+        const qEl = document.getElementById("question");
+        const aEl = document.getElementById("answers");
+        const expEl = document.getElementById("explanation");
+        const nextBtn = document.getElementById("next-btn");
+        const timerEl = document.getElementById("timer");
+
+        function startTimer() {
+            timeLeft = 30;
+            timerEl.textContent = `Time: ${timeLeft} sec.`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = `Time: ${timeLeft} sec.`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    lockAnswers();
+                }
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            clearInterval(timerInterval);
+            expEl.classList.add("hidden");
+            nextBtn.style.display = "none";
+
+            let qData = questions[index];
+            qEl.textContent = qData.q;
+            aEl.innerHTML = "";
+
+            qData.a.forEach((ans, i) => {
+                let btn = document.createElement("button");
+                btn.textContent = ans;
+                btn.classList.add("quiz-btn");
+                btn.onclick = () => checkAnswer(i, qData.c, qData.exp);
+                aEl.appendChild(btn);
+            });
+
+            startTimer();
+        }
+
+        function checkAnswer(i, correct, explanation) {
+            clearInterval(timerInterval);
+            let buttons = document.querySelectorAll(".quiz-btn");
+            buttons.forEach(btn => btn.disabled = true);
+            buttons[correct].style.background = "green";
+            if (i === correct) {
+                score++;
+            } else {
+                buttons[i].style.background = "red";
+            }
+            expEl.textContent = explanation;
+            expEl.classList.remove("hidden");
+            nextBtn.style.display = "block";
+        }
+
+        function lockAnswers() {
+            let buttons = document.querySelectorAll(".quiz-btn");
+            buttons.forEach(btn => btn.disabled = true);
+            expEl.textContent = "Time's up!";
+            expEl.classList.remove("hidden");
+            nextBtn.style.display = "block";
+        }
+
+        function nextQuestion() {
+            index++;
+            if (index < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            qEl.textContent = `You scored ${score} out of ${questions.length} points!`;
+            aEl.innerHTML = "";
+            expEl.classList.add("hidden");
+            nextBtn.remove();
+            timerEl.remove();
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
